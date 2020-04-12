@@ -1,3 +1,5 @@
+assume cs:programCode, ds:programData
+
 programData segment
     ; znaki
     include font.asm
@@ -8,7 +10,7 @@ programData segment
     ; dane
     zoom db 3 dup(?)
     zoom_number dw 1
-    text_to_zoom db 256 dup(?)
+    text_to_zoom db 100 dup(?)
 programData ends
 
 ;-----
@@ -25,7 +27,14 @@ init:
     mov ax,seg programStack
     mov ss,ax
     mov sp,offset top
+
     call get_args
+
+    mov ax,seg programData
+    mov ds,ax
+
+    mov si,offset zoom
+    call get_zoom_number
 
 finish:
     mov ah,4ch
@@ -36,7 +45,7 @@ finish:
 
 get_args:
     mov di,81h
-    mov ax, seg programData
+    mov ax,seg programData
     mov es,ax
 
     pre_get_text_to_zoom:
@@ -70,6 +79,25 @@ get_args:
 
 ;***
 
+get_zoom_number:
+    mov ax,0
+    mov bx,10
+
+    ciphers_loop:
+        cmp byte ptr ds:[si],0
+        je loop_end
+        sub byte ptr ds:[si],0
+        mul bx
+        add al, byte ptr ds:[si]
+        inc si
+        jmp ciphers_loop
+
+    loop_end:
+        mov word ptr ds:[zoom_number], ax
+        ret
+
+;***
+
 spaces_iterator:
     iterator_loop:
         cmp byte ptr [di],' '
@@ -90,7 +118,7 @@ error_handler:
 ;***
 
 print_message:
-    mov ax,seg data
+    mov ax,seg programData
     mov ds,ax
     mov ah,09h
     int 21h

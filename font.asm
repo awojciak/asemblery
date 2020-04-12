@@ -1,5 +1,5 @@
-font
-    db 0ch, 1eh, 33h, 33h, 3fh, 33h, 33h, 00h
+; litery A-Z zapisane w postaci bitmap 8x8
+font db 0ch, 1eh, 33h, 33h, 3fh, 33h, 33h, 00h
     db 3fh, 66h, 66h, 3eh, 66h, 66h, 3fh, 00h
     db 3ch, 66h, 03h, 03h, 03h, 66h, 3ch, 00h
     db 1fh, 36h, 66h, 66h, 66h, 36h, 1fh, 00h
