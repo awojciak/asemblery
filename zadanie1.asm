@@ -8,11 +8,11 @@ programData segment
     ; dane
     input_name db 100 dup(?)
     output_name db 100 dup(?)
-    password db 100 dup(?)
+    password db 100 dup('$')
     input dw ?
     output dw ?
     len dw ?
-    buf db 1000 dup(?)
+    buf db 1000 dup('$')
 programData ends
 
 ;-----
@@ -48,25 +48,12 @@ finish:
 
 ;***
 
-success_handler:
-    mov dx,offset success_message
-    call print_message
-    call finish
-
-;***
-
-error_handler:
-    mov dx,offset error_message
-    call print_message
-    call finish
-
-;***
-
 print_message:
     mov ax,seg programData
     mov ds,ax
     mov ah,09h
     int 21h
+
     ret
 
 ;***
@@ -81,9 +68,10 @@ get_args:
         call spaces_iterator
 
     get_input_name:
-        cmp byte ptr ds:[di],' '
+        mov al,byte ptr ds:[di]
+        cmp al,' '
         je pre_get_output_name
-        mov byte ptr es:[si], ds:[di]
+        mov byte ptr es:[si],al
 
         inc di
         inc si
@@ -94,9 +82,10 @@ get_args:
         call spaces_iterator
 
     get_output_name:
-        cmp byte ptr ds:[di],' '
+        mov al,byte ptr ds:[di]
+        cmp al,' '
         je pre_get_password
-        mov byte ptr es:[si], ds:[di]
+        mov byte ptr es:[si],al
 
         inc di
         inc si
@@ -106,16 +95,16 @@ get_args:
         mov si,offset password
         call spaces_iterator
 
-        cmp byte ptr ds:[di],'"'
-        je error_handler
+        mov al,byte ptr ds:[di]
+        cmp al,'"'
+        jne error_handler
         inc di
-        cmp byte ptr ds:[di],'"'
-        je error_handler
 
     get_password:
-        cmp byte ptr ds:[di],'"'
+        mov al,byte ptr ds:[di]
+        cmp al,'"'
         je end_getting_args
-        mov byte ptr es:[si], ds:[di]
+        mov byte ptr es:[si],al
 
         inc di
         inc si
@@ -134,7 +123,7 @@ open_input:
     int 21h
 
     jc error_handler
-    mov word ptr ds:[input], ax
+    mov word ptr ds:[input],ax
 
     ret
 
@@ -151,6 +140,20 @@ create_output:
     mov word ptr ds:[output],ax
 
     ret
+
+;***
+
+success_handler:
+    mov dx,offset success_message
+    call print_message
+    call finish
+
+;***
+
+error_handler:
+    mov dx,offset error_message
+    call print_message
+    call finish
 
 ;***
 
@@ -179,15 +182,16 @@ use_xor:
         mov di,offset password
 
     xoring_loop:
-        cmp byte ptr ds:[di],0
+        mov al,byte ptr ds:[di]
+        cmp al,0
         je password_from_start
 
-        xor byte ptr ds:[si], byte ptr ds:[di]
+        xor byte ptr ds:[si],al
 
         inc si
         inc di
 
-        jmp xoring_loop
+        loop xoring_loop
 
     save_result:
         mov bx, word ptr ds:[output]

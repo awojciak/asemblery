@@ -53,9 +53,10 @@ get_args:
         call spaces_iterator
 
     get_text_to_zoom:
-        cmp byte ptr ds:[di],' '
+        mov al,byte ptr ds:[di]
+        cmp al,' '
         je pre_get_zoom
-        mov byte ptr es:[si], ds:[di]
+        mov byte ptr es:[si],al
 
         inc di
         inc si
@@ -66,9 +67,10 @@ get_args:
         call spaces_iterator
 
     get_zoom:
-        cmp byte ptr ds:[di],' '
+        mov al,byte ptr ds:[di]
+        cmp al,' '
         je end_getting_args
-        mov byte ptr es:[si], ds:[di]
+        mov byte ptr es:[si],al
 
         inc di
         inc si
